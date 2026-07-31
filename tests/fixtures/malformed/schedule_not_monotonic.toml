@@ -1,0 +1,22 @@
+format_version = "1.1"
+name = "schedule_not_monotonic"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 30.0
+speed = 9.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }, { time = 0.0, accel = -1.0 }]
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"

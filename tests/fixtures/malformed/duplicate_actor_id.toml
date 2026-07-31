@@ -1,0 +1,28 @@
+format_version = "1.1"
+name = "duplicate_actor_id"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 30.0
+speed = 9.0
+behaviour = "scripted"
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 60.0
+speed = 9.0
+behaviour = "scripted"
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"

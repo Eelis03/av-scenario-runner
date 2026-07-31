@@ -1,0 +1,16 @@
+format_version = "1.1"
+name = "ego_lane_out_of_range"
+
+[road]
+kind = "straight"
+lanes = 2
+
+[ego]
+lane = 5
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"

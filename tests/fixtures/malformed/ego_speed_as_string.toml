@@ -1,0 +1,14 @@
+format_version = "1.1"
+name = "ego_speed_as_string"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = "ten"
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"

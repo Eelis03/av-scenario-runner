@@ -1,0 +1,15 @@
+format_version = "1.1"
+name = "arc_without_radius"
+
+[road]
+kind = "arc"
+direction = "left"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"

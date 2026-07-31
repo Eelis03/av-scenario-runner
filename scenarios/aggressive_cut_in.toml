@@ -1,0 +1,66 @@
+# EXPECTED FAILURE.
+#
+# A much slower vehicle cuts in close ahead. The ego avoids contact, so
+# no_collision holds, but time to collision drops below the threshold and the
+# braking demand leaves the comfort band. This is the graded failure the suite
+# needs: not every failure is a crash, and a report that only counts crashes
+# cannot tell a near miss from a comfortable stop.
+format_version = "1.1"
+name = "aggressive_cut_in"
+description = "Close, slow cut in that breaks the time to collision and comfort assertions."
+expected_outcome = "fail"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 2
+lane_width = 3.5
+length = 400.0
+speed_limit = 16.0
+
+[ego]
+lane = 0
+s = 0.0
+speed = 15.5
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 16.0
+time_gap = 1.5
+min_gap = 2.0
+max_accel = 1.4
+comfort_decel = 2.0
+max_decel = 8.0
+
+[[actor]]
+id = "cutter"
+lane = 1
+s = 18.0
+speed = 8.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+lane_change = { target_lane = 0, start_time = 0.5, duration = 1.0 }
+
+[termination]
+max_time = 16.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 1.0
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -3.0
+maximum = 2.0
+
+[[assert]]
+kind = "lateral_acceleration"
+limit = 1.5

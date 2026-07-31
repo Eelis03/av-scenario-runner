@@ -1,0 +1,15 @@
+format_version = "1.1"
+name = "unknown_road_key"
+
+[road]
+kind = "straight"
+lane_with = 3.5
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"

@@ -1,0 +1,20 @@
+format_version = "1.1"
+name = "duplicate_assertion_name"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"
+name = "safety"
+
+[[assert]]
+kind = "min_distance"
+threshold = 1.0
+name = "safety"

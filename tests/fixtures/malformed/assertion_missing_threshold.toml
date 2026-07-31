@@ -1,0 +1,14 @@
+format_version = "1.1"
+name = "assertion_missing_threshold"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "min_time_to_collision"

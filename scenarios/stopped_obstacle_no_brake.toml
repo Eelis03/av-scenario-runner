@@ -1,0 +1,64 @@
+# EXPECTED FAILURE.
+#
+# The ego runs the constant_speed controller, which holds its desired speed and
+# never reacts to anything ahead. It drives into a stationary vehicle. The
+# scenario exists so the harness can be seen to detect a collision, with the
+# clearance and the time at which contact occurred, rather than only ever
+# printing green.
+format_version = "1.1"
+name = "stopped_obstacle_no_brake"
+description = "Unsafe constant speed controller collides with a stationary vehicle 100 m ahead."
+expected_outcome = "fail"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 1
+lane_width = 3.5
+length = 400.0
+speed_limit = 13.9
+
+[ego]
+lane = 0
+s = 0.0
+speed = 13.0
+controller = "constant_speed"
+
+[ego.longitudinal]
+desired_speed = 13.0
+max_accel = 1.4
+comfort_decel = 2.0
+
+[[actor]]
+id = "obstacle"
+lane = 0
+s = 100.0
+speed = 0.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+
+[termination]
+max_time = 20.0
+goal_s = 200.0
+stop_on_collision = true
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 1.0
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "goal_reached"
+goal_s = 200.0
+time_budget = 18.0
+
+[[assert]]
+kind = "speed_limit"
+tolerance = 0.1

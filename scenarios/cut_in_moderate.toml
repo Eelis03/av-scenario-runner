@@ -1,0 +1,65 @@
+# A neighbouring vehicle changes into the ego lane ahead with a workable gap.
+# The ego is expected to yield without leaving its comfort band.
+format_version = "1.1"
+name = "cut_in_moderate"
+description = "Adjacent lane vehicle cuts in 45 m ahead over three seconds while travelling slower."
+expected_outcome = "pass"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 2
+lane_width = 3.5
+length = 400.0
+speed_limit = 13.9
+
+[ego]
+lane = 0
+s = 0.0
+speed = 13.5
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 13.9
+time_gap = 1.4
+min_gap = 2.0
+max_accel = 1.4
+comfort_decel = 2.0
+
+[[actor]]
+id = "cutter"
+lane = 1
+s = 45.0
+speed = 11.5
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+lane_change = { target_lane = 0, start_time = 2.0, duration = 3.0 }
+
+[termination]
+max_time = 20.0
+goal_s = 200.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 0.8
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -3.5
+maximum = 2.0
+
+[[assert]]
+kind = "lateral_acceleration"
+limit = 1.5
+
+[[assert]]
+kind = "speed_limit"
+tolerance = 0.1

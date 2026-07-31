@@ -1,0 +1,60 @@
+# The lead vehicle brakes hard at t = 4 s and holds standstill. The ego must
+# keep a safe gap without exceeding its own comfort band.
+format_version = "1.1"
+name = "lead_vehicle_braking"
+description = "Lead vehicle decelerates at 3 m/s^2 to standstill ahead of the ego."
+expected_outcome = "pass"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 2
+lane_width = 3.5
+length = 400.0
+speed_limit = 13.9
+
+[ego]
+lane = 0
+s = 0.0
+speed = 13.0
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 13.9
+time_gap = 1.5
+min_gap = 2.0
+max_accel = 1.4
+comfort_decel = 2.0
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 40.0
+speed = 13.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }, { time = 4.0, accel = -3.0 }]
+
+[termination]
+max_time = 20.0
+goal_s = 120.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 0.8
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -4.0
+maximum = 2.0
+
+[[assert]]
+kind = "speed_limit"
+tolerance = 0.1

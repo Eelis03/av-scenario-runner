@@ -1,0 +1,70 @@
+# A slower vehicle merges into the ego lane from the left over four seconds.
+# The ego must open a gap and settle into following it.
+format_version = "1.1"
+name = "merge_from_ramp"
+description = "Slower vehicle merges into the ego lane 50 m ahead over four seconds."
+expected_outcome = "pass"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 3
+lane_width = 3.5
+length = 500.0
+speed_limit = 16.0
+
+[ego]
+lane = 0
+s = 0.0
+speed = 14.0
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 16.0
+time_gap = 1.5
+min_gap = 2.0
+max_accel = 1.4
+comfort_decel = 2.0
+
+[[actor]]
+id = "merger"
+lane = 1
+s = 50.0
+speed = 11.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }, { time = 8.0, accel = 0.5 }]
+lane_change = { target_lane = 0, start_time = 2.5, duration = 4.0 }
+
+[[actor]]
+id = "outer_traffic"
+lane = 2
+s = 60.0
+speed = 15.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+
+[termination]
+max_time = 22.0
+goal_s = 220.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 0.8
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -4.0
+maximum = 2.0
+
+[[assert]]
+kind = "goal_reached"
+goal_s = 220.0
+time_budget = 21.0

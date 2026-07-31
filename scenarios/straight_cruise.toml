@@ -1,0 +1,52 @@
+# Free driving with no other traffic. The baseline case: if this scenario does
+# not pass, nothing else in the suite is interpretable.
+format_version = "1.1"
+name = "straight_cruise"
+description = "Ego accelerates to the speed limit on an empty straight road and reaches the goal."
+expected_outcome = "pass"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 2
+lane_width = 3.5
+length = 400.0
+speed_limit = 13.9
+
+[ego]
+lane = 0
+s = 0.0
+speed = 8.0
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 15.0
+max_accel = 1.4
+comfort_decel = 2.0
+
+[termination]
+max_time = 24.0
+goal_s = 250.0
+stop_at_goal = true
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "speed_limit"
+tolerance = 0.1
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -3.0
+maximum = 2.0
+
+[[assert]]
+kind = "lateral_acceleration"
+limit = 1.5
+
+[[assert]]
+kind = "goal_reached"
+goal_s = 250.0
+time_budget = 22.0

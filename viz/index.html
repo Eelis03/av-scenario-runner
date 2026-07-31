@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scenario playback</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1a1d21;
+        --muted: #5c626b;
+        --line: #d8dce2;
+        --pass: #1f7a4d;
+        --fail: #b3202a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.25rem;
+        font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: var(--ink);
+        background: #ffffff;
+      }
+      h1 {
+        font-size: 1.1rem;
+        margin: 0 0 0.25rem;
+      }
+      p.lede {
+        margin: 0 0 1rem;
+        color: var(--muted);
+        max-width: 62ch;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr);
+        gap: 1rem;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+      canvas {
+        width: 100%;
+        height: 420px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        display: block;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-top: 0.75rem;
+      }
+      .controls label {
+        display: inline-flex;
+        gap: 0.35rem;
+        align-items: center;
+        color: var(--muted);
+      }
+      button,
+      select,
+      input[type="file"] {
+        font: inherit;
+        padding: 0.3rem 0.6rem;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: #fbfbfc;
+        color: inherit;
+      }
+      button {
+        min-width: 5rem;
+        cursor: pointer;
+      }
+      input[type="range"] {
+        flex: 1 1 220px;
+        min-width: 160px;
+      }
+      .status {
+        margin: 0.75rem 0 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .status.ok {
+        color: var(--muted);
+      }
+      .status.bad {
+        color: var(--fail);
+      }
+      dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.15rem 0.75rem;
+        margin: 0 0 1rem;
+        font-variant-numeric: tabular-nums;
+      }
+      dt {
+        color: var(--muted);
+      }
+      dd {
+        margin: 0;
+        text-align: right;
+      }
+      ul.verdicts {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.4rem;
+      }
+      .verdict {
+        border-left: 3px solid var(--line);
+        padding-left: 0.5rem;
+      }
+      .verdict.pass {
+        border-left-color: var(--pass);
+      }
+      .verdict.fail {
+        border-left-color: var(--fail);
+      }
+      .verdict-name {
+        display: block;
+        font-weight: 600;
+      }
+      .verdict-value {
+        display: block;
+        color: var(--muted);
+        font-size: 0.85em;
+        font-variant-numeric: tabular-nums;
+      }
+      h2 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin: 0 0 0.5rem;
+      }
+      noscript {
+        color: var(--fail);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Scenario playback</h1>
+    <p class="lede">
+      Plays back a JSON trace exported by <code>scenario_runner.analysis.export</code>. The camera
+      follows the ego vehicle and rotates with it, so a curved road reads the same as a straight
+      one. Nothing here contacts the network.
+    </p>
+
+    <div class="layout">
+      <div>
+        <canvas id="stage"></canvas>
+        <div class="controls">
+          <button id="play" type="button">Play</button>
+          <input id="scrub" type="range" min="0" max="1" step="1" value="0" aria-label="step" />
+          <label>
+            rate
+            <select id="rate">
+              <option value="0.25">0.25x</option>
+              <option value="0.5">0.5x</option>
+              <option value="1" selected>1x</option>
+              <option value="2">2x</option>
+              <option value="4">4x</option>
+            </select>
+          </label>
+          <label>
+            zoom
+            <input id="scale" type="range" min="2" max="20" step="0.5" value="7" />
+          </label>
+          <label>
+            <input id="trails" type="checkbox" checked />
+            trails
+          </label>
+          <label>
+            trace
+            <select id="source"></select>
+          </label>
+          <label>
+            open
+            <input id="file" type="file" accept="application/json,.json" />
+          </label>
+        </div>
+        <p id="status" class="status ok">loading</p>
+        <noscript>This page needs JavaScript to play a trace.</noscript>
+      </div>
+
+      <aside>
+        <h2>Readout</h2>
+        <dl id="readout"></dl>
+        <h2>Assertions</h2>
+        <ul id="verdicts" class="verdicts"></ul>
+      </aside>
+    </div>
+
+    <script type="module" src="dist/main.js"></script>
+  </body>
+</html>

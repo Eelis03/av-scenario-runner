@@ -1,0 +1,14 @@
+format_version = "1.1"
+name = "unknown_assertion_kind"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_jerk"

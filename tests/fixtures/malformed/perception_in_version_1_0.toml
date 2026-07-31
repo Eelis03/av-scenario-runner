@@ -1,0 +1,17 @@
+format_version = "1.0"
+name = "perception_in_version_1_0"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "no_collision"
+
+[perception]
+range_noise_std = 0.5

@@ -1,0 +1,59 @@
+# A stationary obstacle in the ego lane. The ego is expected to come to a stop
+# behind it rather than to swerve, since this build has no lane change planner.
+format_version = "1.1"
+name = "stopped_obstacle"
+description = "Stationary vehicle 120 m ahead in the ego lane; ego must stop behind it."
+expected_outcome = "pass"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "straight"
+lanes = 2
+lane_width = 3.5
+length = 400.0
+speed_limit = 13.9
+
+[ego]
+lane = 0
+s = 0.0
+speed = 13.5
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 13.9
+time_gap = 1.5
+min_gap = 2.5
+max_accel = 1.4
+comfort_decel = 2.0
+
+[[actor]]
+id = "obstacle"
+lane = 0
+s = 120.0
+speed = 0.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+
+[termination]
+max_time = 25.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 1.0
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -4.0
+maximum = 2.0
+
+[[assert]]
+kind = "speed_limit"
+tolerance = 0.1

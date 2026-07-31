@@ -1,0 +1,15 @@
+format_version = "1.1"
+name = "goal_reached_without_goal"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+
+[[assert]]
+kind = "goal_reached"
+time_budget = 4.0

@@ -1,0 +1,11 @@
+format_version = "1.1"
+name = "no_assertions"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0

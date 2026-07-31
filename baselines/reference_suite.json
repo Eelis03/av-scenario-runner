@@ -1,0 +1,641 @@
+{
+  "result_version": "1.0",
+  "summary": {
+    "total": 10,
+    "passed": 8,
+    "failed": 2,
+    "unexpected": 0
+  },
+  "scenarios": [
+    {
+      "name": "aggressive_cut_in",
+      "source": "aggressive_cut_in.toml",
+      "expected_outcome": "fail",
+      "passed": false,
+      "matches_expectation": true,
+      "steps": 321,
+      "duration": 16.000000000000092,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 1.652285507172393,
+          "worst_time": 1.900000000000001,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 1.652 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 1.652285507172393,
+          "worst_time": 1.900000000000001,
+          "unit": "m",
+          "bound": ">= 1 m",
+          "detail": "margin +0.652 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": false,
+          "worst_value": 0.707082481797871,
+          "worst_time": 1.4500000000000006,
+          "unit": "s",
+          "bound": ">= 1.5 s",
+          "detail": "margin -0.793 s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": false,
+          "worst_value": -8.0,
+          "worst_time": 0.9500000000000003,
+          "unit": "m/s^2",
+          "bound": "in [-3, 2] m/s^2",
+          "detail": "peak magnitude 8.000 m/s^2"
+        },
+        {
+          "name": "lateral_acceleration",
+          "kind": "lateral_acceleration",
+          "passed": true,
+          "worst_value": 0.0,
+          "worst_time": 0.0,
+          "unit": "m/s^2",
+          "bound": "|a| <= 1.5 m/s^2",
+          "detail": "peak magnitude 0.000 m/s^2"
+        }
+      ]
+    },
+    {
+      "name": "curved_lane_keeping",
+      "source": "curved_lane_keeping.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 401,
+      "duration": 20.00000000000015,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 35.491630689052805,
+          "worst_time": 20.00000000000015,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 35.492 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 35.491630689052805,
+          "worst_time": 20.00000000000015,
+          "unit": "m",
+          "bound": ">= 1 m",
+          "detail": "margin +34.492 m"
+        },
+        {
+          "name": "lateral_acceleration",
+          "kind": "lateral_acceleration",
+          "passed": true,
+          "worst_value": 1.230853281340798,
+          "worst_time": 8.399999999999984,
+          "unit": "m/s^2",
+          "bound": "|a| <= 2.5 m/s^2",
+          "detail": "peak magnitude 1.231 m/s^2"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": 0.8936270473905292,
+          "worst_time": 0.0,
+          "unit": "m/s^2",
+          "bound": "in [-3, 2] m/s^2",
+          "detail": "peak magnitude 0.894 m/s^2"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.587791468711792,
+          "worst_time": 8.399999999999984,
+          "unit": "m/s",
+          "bound": "<= 15.1 m/s",
+          "detail": "exceedance -1.412 m/s"
+        }
+      ]
+    },
+    {
+      "name": "cut_in_moderate",
+      "source": "cut_in_moderate.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 401,
+      "duration": 20.00000000000015,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 24.798645757874343,
+          "worst_time": 20.00000000000015,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 24.799 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 24.798645757874343,
+          "worst_time": 20.00000000000015,
+          "unit": "m",
+          "bound": ">= 0.8 m",
+          "detail": "margin +23.999 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": true,
+          "worst_value": 15.737915709222811,
+          "worst_time": 2.1000000000000005,
+          "unit": "s",
+          "bound": ">= 1.5 s",
+          "detail": "margin +14.238 s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": -1.1571275399522971,
+          "worst_time": 3.2999999999999963,
+          "unit": "m/s^2",
+          "bound": "in [-3.5, 2] m/s^2",
+          "detail": "peak magnitude 1.157 m/s^2"
+        },
+        {
+          "name": "lateral_acceleration",
+          "kind": "lateral_acceleration",
+          "passed": true,
+          "worst_value": 0.0,
+          "worst_time": 0.0,
+          "unit": "m/s^2",
+          "bound": "|a| <= 1.5 m/s^2",
+          "detail": "peak magnitude 0.000 m/s^2"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.792115973248912,
+          "worst_time": 3.2999999999999963,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.108 m/s"
+        }
+      ]
+    },
+    {
+      "name": "follower_tailgate",
+      "source": "follower_tailgate.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 401,
+      "duration": 20.00000000000015,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 5.54649400587846,
+          "worst_time": 19.500000000000142,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 5.546 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 5.54649400587846,
+          "worst_time": 19.500000000000142,
+          "unit": "m",
+          "bound": ">= 0.5 m",
+          "detail": "margin +5.046 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": true,
+          "worst_value": 5.158851527782819,
+          "worst_time": 7.699999999999981,
+          "unit": "s",
+          "bound": ">= 1.2 s",
+          "detail": "margin +3.959 s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": -1.160717586314452,
+          "worst_time": 6.999999999999983,
+          "unit": "m/s^2",
+          "bound": "in [-3.5, 2] m/s^2",
+          "detail": "peak magnitude 1.161 m/s^2"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.023267156020454,
+          "worst_time": 3.049999999999997,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.877 m/s"
+        }
+      ]
+    },
+    {
+      "name": "lead_vehicle_braking",
+      "source": "lead_vehicle_braking.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 401,
+      "duration": 20.00000000000015,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 1.089762249533936,
+          "worst_time": 17.20000000000011,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 1.090 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 1.089762249533936,
+          "worst_time": 17.20000000000011,
+          "unit": "m",
+          "bound": ">= 0.8 m",
+          "detail": "margin +0.290 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": true,
+          "worst_value": 1.8119694134388677,
+          "worst_time": 10.85000000000002,
+          "unit": "s",
+          "bound": ">= 1.5 s",
+          "detail": "margin +0.312 s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": -2.7260112779607746,
+          "worst_time": 8.349999999999984,
+          "unit": "m/s^2",
+          "bound": "in [-4, 2] m/s^2",
+          "detail": "peak magnitude 2.726 m/s^2"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.0,
+          "worst_time": 0.0,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.900 m/s"
+        }
+      ]
+    },
+    {
+      "name": "merge_from_ramp",
+      "source": "merge_from_ramp.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 441,
+      "duration": 22.000000000000178,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 21.18421692907268,
+          "worst_time": 8.899999999999991,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 21.184 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 21.18421692907268,
+          "worst_time": 8.899999999999991,
+          "unit": "m",
+          "bound": ">= 0.8 m",
+          "detail": "margin +20.384 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": true,
+          "worst_value": 8.011296275590606,
+          "worst_time": 3.049999999999997,
+          "unit": "s",
+          "bound": ">= 1.5 s",
+          "detail": "margin +6.511 s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": -3.369671685140814,
+          "worst_time": 4.249999999999993,
+          "unit": "m/s^2",
+          "bound": "in [-4, 2] m/s^2",
+          "detail": "peak magnitude 3.370 m/s^2"
+        },
+        {
+          "name": "goal_reached",
+          "kind": "goal_reached",
+          "passed": true,
+          "worst_value": 16.900000000000105,
+          "worst_time": 16.900000000000105,
+          "unit": "s",
+          "bound": "<= 21 s",
+          "detail": "reached 220 m with +4.100 s to spare"
+        }
+      ]
+    },
+    {
+      "name": "speed_limit_compliance",
+      "source": "speed_limit_compliance.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 401,
+      "duration": 20.00000000000015,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.89982463684524,
+          "worst_time": 20.00000000000015,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.000 m/s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": 1.3178154351838522,
+          "worst_time": 0.0,
+          "unit": "m/s^2",
+          "bound": "in [-3, 2] m/s^2",
+          "detail": "peak magnitude 1.318 m/s^2"
+        },
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": "inf",
+          "worst_time": null,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "no actor in this scenario"
+        },
+        {
+          "name": "goal_reached",
+          "kind": "goal_reached",
+          "passed": true,
+          "worst_value": 17.95000000000012,
+          "worst_time": 17.95000000000012,
+          "unit": "s",
+          "bound": "<= 19.5 s",
+          "detail": "reached 240 m with +1.550 s to spare"
+        }
+      ]
+    },
+    {
+      "name": "stopped_obstacle",
+      "source": "stopped_obstacle.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 501,
+      "duration": 25.00000000000022,
+      "terminated": "max_time",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": 1.566440671014493,
+          "worst_time": 16.300000000000097,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach 1.566 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": true,
+          "worst_value": 1.566440671014493,
+          "worst_time": 16.300000000000097,
+          "unit": "m",
+          "bound": ">= 1 m",
+          "detail": "margin +0.566 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": true,
+          "worst_value": 1.9637345615087993,
+          "worst_time": 11.400000000000027,
+          "unit": "s",
+          "bound": ">= 1.5 s",
+          "detail": "margin +0.464 s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": -1.6470379883012527,
+          "worst_time": 9.650000000000002,
+          "unit": "m/s^2",
+          "bound": "in [-4, 2] m/s^2",
+          "detail": "peak magnitude 1.647 m/s^2"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.5,
+          "worst_time": 0.0,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.400 m/s"
+        }
+      ]
+    },
+    {
+      "name": "stopped_obstacle_no_brake",
+      "source": "stopped_obstacle_no_brake.toml",
+      "expected_outcome": "fail",
+      "passed": false,
+      "matches_expectation": true,
+      "steps": 147,
+      "duration": 7.299999999999982,
+      "terminated": "collision",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": false,
+          "worst_value": -0.4082053436308515,
+          "worst_time": 7.299999999999982,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "closest approach -0.408 m"
+        },
+        {
+          "name": "min_distance",
+          "kind": "min_distance",
+          "passed": false,
+          "worst_value": -0.4082053436308515,
+          "worst_time": 7.299999999999982,
+          "unit": "m",
+          "bound": ">= 1 m",
+          "detail": "margin -1.408 m"
+        },
+        {
+          "name": "min_time_to_collision",
+          "kind": "min_time_to_collision",
+          "passed": false,
+          "worst_value": 0.0,
+          "worst_time": 7.299999999999982,
+          "unit": "s",
+          "bound": ">= 1.5 s",
+          "detail": "margin -1.500 s"
+        },
+        {
+          "name": "goal_reached",
+          "kind": "goal_reached",
+          "passed": false,
+          "worst_value": 7.299999999999982,
+          "worst_time": 7.299999999999982,
+          "unit": "s",
+          "bound": "<= 18 s",
+          "detail": "goal not reached, 105.100 m short at end of run"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.0,
+          "worst_time": 0.0,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.900 m/s"
+        }
+      ]
+    },
+    {
+      "name": "straight_cruise",
+      "source": "straight_cruise.toml",
+      "expected_outcome": "pass",
+      "passed": true,
+      "matches_expectation": true,
+      "steps": 391,
+      "duration": 19.500000000000142,
+      "terminated": "goal",
+      "error": null,
+      "assertions": [
+        {
+          "name": "no_collision",
+          "kind": "no_collision",
+          "passed": true,
+          "worst_value": "inf",
+          "worst_time": null,
+          "unit": "m",
+          "bound": "> 0 m",
+          "detail": "no actor in this scenario"
+        },
+        {
+          "name": "speed_limit",
+          "kind": "speed_limit",
+          "passed": true,
+          "worst_value": 13.895403937128657,
+          "worst_time": 19.500000000000142,
+          "unit": "m/s",
+          "bound": "<= 14 m/s",
+          "detail": "exceedance -0.005 m/s"
+        },
+        {
+          "name": "longitudinal_acceleration",
+          "kind": "longitudinal_acceleration",
+          "passed": true,
+          "worst_value": 1.2463867128621267,
+          "worst_time": 0.0,
+          "unit": "m/s^2",
+          "bound": "in [-3, 2] m/s^2",
+          "detail": "peak magnitude 1.246 m/s^2"
+        },
+        {
+          "name": "lateral_acceleration",
+          "kind": "lateral_acceleration",
+          "passed": true,
+          "worst_value": 0.0,
+          "worst_time": 0.0,
+          "unit": "m/s^2",
+          "bound": "|a| <= 1.5 m/s^2",
+          "detail": "peak magnitude 0.000 m/s^2"
+        },
+        {
+          "name": "goal_reached",
+          "kind": "goal_reached",
+          "passed": true,
+          "worst_value": 19.500000000000142,
+          "worst_time": 19.500000000000142,
+          "unit": "s",
+          "bound": "<= 22 s",
+          "detail": "reached 250 m with +2.500 s to spare"
+        }
+      ]
+    }
+  ]
+}

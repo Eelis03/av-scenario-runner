@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+outputs/
+.DS_Store
+
+# viz build artefacts; `npm install && npm run build` inside viz/ recreates them
+viz/node_modules/
+viz/*.tsbuildinfo

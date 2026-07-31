@@ -1,0 +1,15 @@
+format_version = "1.1"
+name = "stop_at_goal_without_goal"
+
+[road]
+kind = "straight"
+
+[ego]
+speed = 10.0
+
+[termination]
+max_time = 5.0
+stop_at_goal = true
+
+[[assert]]
+kind = "no_collision"

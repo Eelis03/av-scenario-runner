@@ -1,0 +1,67 @@
+# Constant curvature left hand bend. The ego holds its lane while a slower
+# vehicle ahead sets the pace, so lateral and longitudinal demands coincide.
+format_version = "1.1"
+name = "curved_lane_keeping"
+description = "Ego tracks a 150 m radius left bend behind a slower lead vehicle."
+expected_outcome = "pass"
+dt = 0.05
+seed = 1
+
+[road]
+kind = "arc"
+radius = 150.0
+direction = "left"
+lanes = 2
+lane_width = 3.5
+length = 400.0
+speed_limit = 15.0
+
+[ego]
+lane = 0
+s = 0.0
+speed = 11.0
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 15.0
+time_gap = 1.5
+min_gap = 2.0
+max_accel = 1.4
+comfort_decel = 2.0
+
+[ego.lateral]
+lookahead_gain = 0.6
+lookahead_min = 6.0
+lookahead_max = 25.0
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 55.0
+speed = 12.5
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+
+[termination]
+max_time = 20.0
+goal_s = 200.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_distance"
+threshold = 1.0
+
+[[assert]]
+kind = "lateral_acceleration"
+limit = 2.5
+
+[[assert]]
+kind = "longitudinal_acceleration"
+minimum = -3.0
+maximum = 2.0
+
+[[assert]]
+kind = "speed_limit"
+tolerance = 0.1

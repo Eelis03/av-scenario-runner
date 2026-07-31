@@ -1,0 +1,52 @@
+format_version = "1.1"
+name = "minimal"
+description = "The smallest document the parser accepts, used as the base for the malformed set."
+
+[road]
+kind = "straight"
+lanes = 2
+lane_width = 3.5
+length = 200.0
+speed_limit = 13.9
+
+[ego]
+lane = 0
+s = 0.0
+speed = 10.0
+controller = "idm_lane_keep"
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 40.0
+speed = 9.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }, { time = 2.0, accel = -1.0 }]
+lane_change = { target_lane = 1, start_time = 1.0, duration = 2.0 }
+
+[[actor]]
+id = "trail"
+lane = 0
+s = 10.0
+speed = 9.5
+behaviour = "reactive"
+reactive = { desired_speed = 12.0, time_gap = 1.2 }
+
+[termination]
+max_time = 5.0
+goal_s = 40.0
+
+[[assert]]
+kind = "no_collision"
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "goal_reached"
+time_budget = 5.0
+
+[perception]
+range_noise_std = 0.0
+speed_noise_std = 0.0
