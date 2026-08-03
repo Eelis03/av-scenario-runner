@@ -10,6 +10,16 @@ distinguish:
 Both are reported. Only the first, together with a scenario or assertion that
 disappeared, is treated as a regression for exit code purposes.
 
+Names are the only handle a stored baseline has on a scenario, so renaming one
+would otherwise read as a removal, which is a regression, plus an unrelated
+addition. That is noise in the loudest possible place. A rename is therefore
+detected the way a version control system detects one, by content rather than
+by name: a scenario that left the suite and a scenario that joined it are paired
+when every assertion they carry agrees in name, kind, verdict and worst observed
+value, and when that pairing is unambiguous on both sides. The result is one
+informational ``scenario_renamed`` line and no regression. The same rule applies
+to a single assertion renamed inside a scenario.
+
 ``magnitude_class`` exists for the regression tests. Pinning a raw float from
 late in a simulated run makes a test that fails on a different machine for
 reasons that have nothing to do with the code under test, so the recorded
@@ -20,6 +30,7 @@ baseline pins the sign and the decade of the worst value instead. See
 from __future__ import annotations
 
 import math
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Final
@@ -34,6 +45,7 @@ __all__ = [
     "Tolerance",
     "compare_suites",
     "magnitude_class",
+    "match_renames",
 ]
 
 
@@ -46,6 +58,8 @@ class ChangeKind(StrEnum):
     RESOLVED_FAILURE = "resolved_failure"
     SCENARIO_ADDED = "scenario_added"
     ASSERTION_ADDED = "assertion_added"
+    SCENARIO_RENAMED = "scenario_renamed"
+    ASSERTION_RENAMED = "assertion_renamed"
     METRIC_MOVED = "metric_moved"
 
 
@@ -56,7 +70,9 @@ _SEVERITY: Final[dict[ChangeKind, int]] = {
     ChangeKind.RESOLVED_FAILURE: 3,
     ChangeKind.SCENARIO_ADDED: 4,
     ChangeKind.ASSERTION_ADDED: 5,
-    ChangeKind.METRIC_MOVED: 6,
+    ChangeKind.SCENARIO_RENAMED: 6,
+    ChangeKind.ASSERTION_RENAMED: 7,
+    ChangeKind.METRIC_MOVED: 8,
 }
 
 _REGRESSIONS: Final[frozenset[ChangeKind]] = frozenset(
@@ -150,6 +166,15 @@ class ComparisonReport:
         """Assertions whose verdict held but whose worst value moved."""
         return tuple(c for c in self.changes if c.kind is ChangeKind.METRIC_MOVED)
 
+    @property
+    def renames(self) -> tuple[Change, ...]:
+        """Scenarios and assertions matched across a rename by their results."""
+        return tuple(
+            c
+            for c in self.changes
+            if c.kind in {ChangeKind.SCENARIO_RENAMED, ChangeKind.ASSERTION_RENAMED}
+        )
+
     def exit_code(self) -> int:
         """Zero when nothing regressed, one otherwise."""
         return 1 if self.regressed else 0
@@ -176,6 +201,50 @@ def magnitude_class(value: float) -> str:
     return f"{sign}1e{math.floor(math.log10(abs(value)))}"
 
 
+def match_renames[T](
+    gone: Sequence[T], arrived: Sequence[T], same: Callable[[T, T], bool]
+) -> list[tuple[T, T]]:
+    """Pair the things that left with the things that arrived, when it is unambiguous.
+
+    ``same`` decides whether two items carry identical results. A pair is
+    accepted only when each side is the other's single candidate, so a
+    simultaneous removal and addition of two items that both match is left
+    reported as a removal and an addition rather than guessed at. The cost of
+    the rule is stated where it bites: two items whose recorded results agree to
+    the comparison tolerance are indistinguishable here, so a genuine removal
+    accompanied by a genuine addition that happens to reproduce every worst
+    value is reported as a rename.
+    """
+    matches: list[tuple[T, T]] = []
+    for left in gone:
+        candidates = [right for right in arrived if same(left, right)]
+        if len(candidates) != 1:
+            continue
+        right = candidates[0]
+        if sum(1 for other in gone if same(other, right)) != 1:
+            continue
+        matches.append((left, right))
+    return matches
+
+
+def _same_assertion(current: AssertionRecord, baseline: AssertionRecord, band: Tolerance) -> bool:
+    return (
+        current.kind == baseline.kind
+        and current.passed == baseline.passed
+        and band.unchanged(current.worst_value, baseline.worst_value)
+    )
+
+
+def _same_scenario(current: ScenarioRecord, baseline: ScenarioRecord, band: Tolerance) -> bool:
+    if current.passed != baseline.passed:
+        return False
+    now = {item.name: item for item in current.assertions}
+    before = {item.name: item for item in baseline.assertions}
+    if set(now) != set(before):
+        return False
+    return all(_same_assertion(now[name], before[name], band) for name in now)
+
+
 def compare_suites(
     current: SuiteRecord, baseline: SuiteRecord, tolerance: Tolerance | None = None
 ) -> ComparisonReport:
@@ -185,7 +254,33 @@ def compare_suites(
     current_by_name = current.by_name()
     baseline_by_name = baseline.by_name()
 
-    for name in sorted(set(baseline_by_name) - set(current_by_name)):
+    gone = sorted(set(baseline_by_name) - set(current_by_name))
+    arrived = sorted(set(current_by_name) - set(baseline_by_name))
+    renamed = match_renames(
+        gone,
+        arrived,
+        lambda old, new: _same_scenario(current_by_name[new], baseline_by_name[old], band),
+    )
+    for old, new in renamed:
+        changes.append(
+            Change(
+                scenario=f"{old} -> {new}",
+                assertion="",
+                kind=ChangeKind.SCENARIO_RENAMED,
+                baseline_value=None,
+                current_value=None,
+                detail=(
+                    f"matched to the baseline scenario {old!r} by identical results, "
+                    f"{len(baseline_by_name[old].assertions)} assertions unchanged"
+                ),
+            )
+        )
+    paired_old = {old for old, _ in renamed}
+    paired_new = {new for _, new in renamed}
+
+    for name in gone:
+        if name in paired_old:
+            continue
         changes.append(
             Change(
                 scenario=name,
@@ -196,7 +291,9 @@ def compare_suites(
                 detail="scenario is in the baseline but not in this run",
             )
         )
-    for name in sorted(set(current_by_name) - set(baseline_by_name)):
+    for name in arrived:
+        if name in paired_new:
+            continue
         changes.append(
             Change(
                 scenario=name,
@@ -224,7 +321,33 @@ def _compare_scenario(
     current_by_name = {item.name: item for item in current.assertions}
     baseline_by_name = {item.name: item for item in baseline.assertions}
 
-    for name in sorted(set(baseline_by_name) - set(current_by_name)):
+    gone = sorted(set(baseline_by_name) - set(current_by_name))
+    arrived = sorted(set(current_by_name) - set(baseline_by_name))
+    renamed = match_renames(
+        gone,
+        arrived,
+        lambda old, new: _same_assertion(current_by_name[new], baseline_by_name[old], tolerance),
+    )
+    for old, new in renamed:
+        changes.append(
+            Change(
+                scenario=current.name,
+                assertion=f"{old} -> {new}",
+                kind=ChangeKind.ASSERTION_RENAMED,
+                baseline_value=baseline_by_name[old].worst_value,
+                current_value=current_by_name[new].worst_value,
+                detail=(
+                    f"matched to the baseline assertion {old!r} by an unchanged "
+                    f"{baseline_by_name[old].kind} verdict and worst value"
+                ),
+            )
+        )
+    paired_old = {old for old, _ in renamed}
+    paired_new = {new for _, new in renamed}
+
+    for name in gone:
+        if name in paired_old:
+            continue
         changes.append(
             Change(
                 scenario=current.name,
@@ -235,7 +358,9 @@ def _compare_scenario(
                 detail="assertion is in the baseline but not in this run",
             )
         )
-    for name in sorted(set(current_by_name) - set(baseline_by_name)):
+    for name in arrived:
+        if name in paired_new:
+            continue
         changes.append(
             Change(
                 scenario=current.name,

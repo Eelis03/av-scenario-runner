@@ -169,7 +169,9 @@ The comparison tool exposes the same distinction to a user rather than only to t
 of verdict, or a scenario or assertion that disappeared, is a regression and sets the exit code. A
 metric that moved while its verdict held is reported with the size of the movement and does not set
 the exit code, because it may be a deliberate tuning change and it may be the last quiet step
-before a failure, and only the person reading it can tell which.
+before a failure, and only the person reading it can tell which. A scenario that was renamed
+without changing is neither: it is matched to its baseline entry by its results and reported as a
+rename, for the reasons set out under closed limitations below.
 
 ## Rejected alternatives
 
@@ -233,6 +235,42 @@ because it makes them second class and they stop being run. Instead each scenari
 `expected_outcome` and the runner offers both rules: the literal rule for an ordinary suite, and
 the expectation rule for this one.
 
+## Closed limitations
+
+This section records what used to be in the list below, so that a reader can see which problems
+were fixed rather than only which remain.
+
+### Renaming a scenario read as a removal plus an addition
+
+The comparison tool matched scenarios and assertions by name and by nothing else, so renaming
+`merge_from_ramp` to `ramp_merge` produced a `scenario_removed` line, an unrelated `scenario_added`
+line, and exit code 1, because a scenario that disappears is a regression. Nothing had changed
+except a string, and the tool reported the loudest thing it can report.
+
+It is now matched by content, which is how a version control system detects a rename.
+`algorithm/compare.match_renames` pairs a scenario that left the suite with a scenario that joined
+it when every assertion they carry agrees in name, kind, verdict and worst observed value to the
+comparison tolerance. A pair is accepted only when each side is the other's single candidate. The
+result is one informational `scenario_renamed` line, no regression, and exit code 0. The same rule
+runs one level down for a single assertion renamed inside a scenario it stayed in.
+
+The cost is a false positive that is stated rather than hidden. A genuine removal that happens to
+coincide with a genuine addition reproducing every worst observed value to one part in `10^6` is
+reported as a rename, which understates it. That is a narrow window: the two scenarios would have
+to declare the same assertion names with the same verdicts and agree numerically on every one of
+them. The ambiguity rule closes the wider hole, since two candidates on either side are left
+reported as they were rather than guessed at, and the case is covered by
+`tests/test_algorithm.py::test_an_ambiguous_rename_is_not_guessed`. The matching is also a
+comparison of results, not of documents, so a rename that accompanies a real behavioural change is
+not a rename here and stays reported as a removal and an addition.
+
+What remains unchanged is the underlying fact that a stored baseline holds names and results and
+nothing else. There is no identity in a scenario document that survives a rename, and this rule
+recovers one from the results rather than introducing one. Giving each scenario a stable
+identifier in its own document would be the stronger fix, and it was not taken, because an
+identifier that has to be written by hand is an identifier that will be copied along with the file
+it was pasted from.
+
 ## Known limitations
 
 The ego's leader search treats a vehicle as in lane when the lateral separation is less than half
@@ -241,8 +279,16 @@ seen as a leader until it is most of the way across. This is a perception model,
 bug, and it is a fair representation of a naive one, but it means the harness scores a cut in later
 than a real system with lane level tracking would. It is why `scenarios/merge_from_ramp.toml` has
 to place the merging vehicle 50 m ahead rather than 30 m for the scenario to be survivable; an
-earlier version at 30 m produced a collision. Removing the limitation means making the awareness
-band a declared property of the ego rather than a constant in `pipeline/simulator.py`.
+earlier version at 30 m produced a collision. Making the awareness band a declared property of the
+ego rather than a constant in `pipeline/simulator.py` is the obvious change, and it is not
+sufficient on its own. Widening the band to the width of a lane plus a vehicle, which is what lane
+level tracking would see, moves the detection of the merging vehicle earlier by a fraction of a
+second, and the braking demand at 30 m still saturates well outside the comfort band the scenario
+asserts. The only band that restores the 30 m placement is one wider than a lane, at which point
+the ego is reacting to a vehicle that is entirely in the next lane and the model is no longer a
+perception model at all. Closing this properly means giving the actor a predicted lane occupancy
+rather than a current one, which is a planner input rather than a constant, and that is why the
+entry is still here.
 
 The kinematic bicycle has no tyre model, so lateral acceleration above roughly 4 m/s^2 is not
 physically meaningful and the lateral acceleration assertion should not be read as a grip check
@@ -265,10 +311,6 @@ footprint, and a stopped obstacle is modelled as a vehicle with zero speed.
 Perception noise is a Gaussian perturbation of the measured gap and leader speed. There is no
 occlusion, no false negative, no latency, and no track loss, all of which dominate real perception
 failures.
-
-The comparison tool matches scenarios and assertions by name. Renaming a scenario reads as one
-removal and one addition rather than as a rename, which is loud in the right direction but is
-noise.
 
 ## What passing this suite does and does not mean
 

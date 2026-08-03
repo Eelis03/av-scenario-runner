@@ -98,6 +98,7 @@ def render_comparison(report: ComparisonReport) -> str:
         lines.append("")
     lines.append(
         f"new failures {len(report.new_failures)}, "
+        f"renames {len(report.renames)}, "
         f"moved metrics {len(report.moved_metrics)}, "
         f"regressed {report.regressed}"
     )

@@ -23,6 +23,7 @@ from scenario_runner.algorithm.compare import (
     Tolerance,
     compare_suites,
     magnitude_class,
+    match_renames,
 )
 from scenario_runner.algorithm.metrics import (
     clearance_series,
@@ -53,6 +54,7 @@ __all__ = [
     "evaluate_assertions",
     "footprint_corners",
     "magnitude_class",
+    "match_renames",
     "nearest_actor",
     "time_to_collision_series",
 ]

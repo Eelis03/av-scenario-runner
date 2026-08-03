@@ -426,9 +426,9 @@ def test_comparison_reports_a_resolved_failure_separately() -> None:
 
 
 def test_comparison_reports_added_and_removed_scenarios() -> None:
-    """A scenario that disappeared is a regression; a new one is not."""
+    """A scenario that disappeared is a regression; a new and different one is not."""
     baseline = SuiteRecord(scenarios=(_record("gone", True, 2.0), _record("kept", True, 2.0)))
-    current = SuiteRecord(scenarios=(_record("kept", True, 2.0), _record("fresh", True, 2.0)))
+    current = SuiteRecord(scenarios=(_record("kept", True, 2.0), _record("fresh", True, 9.5)))
     report = compare_suites(current, baseline)
     kinds = {change.kind for change in report.changes}
     assert kinds == {ChangeKind.SCENARIO_REMOVED, ChangeKind.SCENARIO_ADDED}
@@ -438,11 +438,88 @@ def test_comparison_reports_added_and_removed_scenarios() -> None:
 def test_comparison_reports_added_and_removed_assertions() -> None:
     """Deleting an assertion is a regression even when everything still passes."""
     baseline = SuiteRecord(scenarios=(_record("s", True, 2.0, assertion="a"),))
-    current = SuiteRecord(scenarios=(_record("s", True, 2.0, assertion="b"),))
+    current = SuiteRecord(scenarios=(_record("s", True, 7.25, assertion="b"),))
     report = compare_suites(current, baseline)
     kinds = {change.kind for change in report.changes}
     assert kinds == {ChangeKind.ASSERTION_REMOVED, ChangeKind.ASSERTION_ADDED}
     assert report.regressed
+
+
+def test_a_renamed_scenario_is_matched_by_its_results() -> None:
+    """Renaming a scenario is one informational change, not a removal and an addition."""
+    baseline = SuiteRecord(scenarios=(_record("merge_from_ramp", True, 8.011),))
+    current = SuiteRecord(scenarios=(_record("ramp_merge", True, 8.011),))
+    report = compare_suites(current, baseline)
+    assert [change.kind for change in report.changes] == [ChangeKind.SCENARIO_RENAMED]
+    assert not report.regressed
+    assert report.exit_code() == 0
+    change = report.renames[0]
+    assert change.scenario == "merge_from_ramp -> ramp_merge"
+    assert "merge_from_ramp" in change.detail
+
+
+def test_a_renamed_assertion_is_matched_by_its_results() -> None:
+    """The same rule applies one level down, to an assertion inside a kept scenario."""
+    baseline = SuiteRecord(scenarios=(_record("s", True, 2.0, assertion="min_ttc"),))
+    current = SuiteRecord(scenarios=(_record("s", True, 2.0, assertion="time_to_collision"),))
+    report = compare_suites(current, baseline)
+    assert [change.kind for change in report.changes] == [ChangeKind.ASSERTION_RENAMED]
+    assert not report.regressed
+    assert report.renames[0].assertion == "min_ttc -> time_to_collision"
+
+
+def test_a_rename_that_also_changed_the_result_is_not_matched() -> None:
+    """A rename is only a rename when nothing else moved; otherwise it stays loud."""
+    baseline = SuiteRecord(scenarios=(_record("old", True, 2.0),))
+    current = SuiteRecord(scenarios=(_record("new", True, 3.4),))
+    report = compare_suites(current, baseline)
+    kinds = {change.kind for change in report.changes}
+    assert kinds == {ChangeKind.SCENARIO_REMOVED, ChangeKind.SCENARIO_ADDED}
+    assert report.regressed
+
+
+def test_a_rename_that_flipped_a_verdict_is_not_matched() -> None:
+    """Identical worst values are not enough; the verdict has to match as well."""
+    baseline = SuiteRecord(scenarios=(_record("old", True, 2.0),))
+    current = SuiteRecord(scenarios=(_record("new", False, 2.0),))
+    report = compare_suites(current, baseline)
+    assert {change.kind for change in report.changes} == {
+        ChangeKind.SCENARIO_REMOVED,
+        ChangeKind.SCENARIO_ADDED,
+    }
+
+
+def test_an_ambiguous_rename_is_not_guessed() -> None:
+    """Two candidates on each side leave the removal and the addition reported as they are."""
+    baseline = SuiteRecord(scenarios=(_record("a", True, 2.0), _record("b", True, 2.0)))
+    current = SuiteRecord(scenarios=(_record("c", True, 2.0), _record("d", True, 2.0)))
+    report = compare_suites(current, baseline)
+    kinds = sorted(change.kind for change in report.changes)
+    assert kinds.count(ChangeKind.SCENARIO_REMOVED) == 2
+    assert kinds.count(ChangeKind.SCENARIO_ADDED) == 2
+    assert not report.renames
+    assert report.regressed
+
+
+def test_a_rename_is_matched_inside_the_comparison_tolerance() -> None:
+    """A rename recorded on another machine still matches within the stated tolerance."""
+    baseline = SuiteRecord(scenarios=(_record("old", True, 2.0),))
+    current = SuiteRecord(scenarios=(_record("new", True, 2.0 + 1e-12),))
+    report = compare_suites(current, baseline, Tolerance(relative=1e-6))
+    assert [change.kind for change in report.changes] == [ChangeKind.SCENARIO_RENAMED]
+
+
+def test_a_rename_alongside_an_unrelated_removal_keeps_both_readable() -> None:
+    """One rename and one genuine removal are reported as one of each."""
+    baseline = SuiteRecord(
+        scenarios=(_record("old", True, 2.0), _record("dropped", True, 5.0))
+    )
+    current = SuiteRecord(scenarios=(_record("new", True, 2.0),))
+    report = compare_suites(current, baseline)
+    kinds = [change.kind for change in report.changes]
+    assert kinds.count(ChangeKind.SCENARIO_RENAMED) == 1
+    assert kinds.count(ChangeKind.SCENARIO_REMOVED) == 1
+    assert report.regressed, "the genuine removal must still set the exit code"
 
 
 def test_comparison_handles_infinite_metrics() -> None:

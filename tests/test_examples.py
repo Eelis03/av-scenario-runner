@@ -62,6 +62,24 @@ def test_a_truncated_export_does_not_overwrite_a_stored_trace() -> None:
     assert "outputs" in completed.stdout
 
 
+def test_a_truncated_figure_run_does_not_overwrite_a_published_figure() -> None:
+    """The published figures come from full runs, so a step cap must not touch them."""
+    published = sorted((REPO_ROOT / "docs" / "figures").glob("*.png"))
+    assert published, "no published figure to protect"
+    before = {path.name: path.read_bytes() for path in published}
+    completed = subprocess.run(
+        [sys.executable, str(EXAMPLES_DIR / "make_figures.py"), "--max-steps", MAX_STEPS],
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+        timeout=180,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert {path.name: path.read_bytes() for path in published} == before
+    assert "outputs" in completed.stdout
+
+
 def test_python_sources_never_reference_the_viz_layer() -> None:
     """The package and its tests must pass with ``viz/`` absent entirely."""
     pattern = re.compile(r"^\s*(?:import|from)\s+viz\b", re.MULTILINE)
