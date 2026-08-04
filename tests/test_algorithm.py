@@ -24,6 +24,7 @@ from scenario_runner.algorithm import (
     compare_suites,
     evaluate_assertion,
     magnitude_class,
+    time_headway_series,
     time_to_collision_series,
 )
 from scenario_runner.model import (
@@ -32,6 +33,7 @@ from scenario_runner.model import (
     LateralAcceleration,
     LongitudinalAcceleration,
     MinDistance,
+    MinTimeHeadway,
     MinTimeToCollision,
     NoCollision,
     SpeedLimit,
@@ -42,10 +44,15 @@ STEPS = 21
 DT = 0.1
 
 
-def _metrics(clearance: list[float], ttc: list[float]) -> RunMetrics:
+def _metrics(
+    clearance: list[float], ttc: list[float], headway: list[float] | None = None
+) -> RunMetrics:
     return RunMetrics(
         clearance=np.asarray(clearance, dtype=np.float64),
         time_to_collision=np.asarray(ttc, dtype=np.float64),
+        time_headway=np.asarray(
+            _uniform(math.inf) if headway is None else headway, dtype=np.float64
+        ),
     )
 
 
@@ -74,6 +81,7 @@ def test_clearance_is_infinite_without_actors() -> None:
     trace = _flat_trace()
     assert np.all(np.isinf(clearance_series(trace)))
     assert np.all(np.isinf(time_to_collision_series(trace)))
+    assert np.all(np.isinf(time_headway_series(trace)))
 
 
 def test_clearance_matches_the_disc_cover_geometry() -> None:
@@ -134,6 +142,51 @@ def test_time_to_collision_sees_a_lateral_encounter() -> None:
     assert float(scored[0]) < 5.0
 
 
+def test_time_headway_is_the_clearance_covered_at_the_current_ego_speed() -> None:
+    """Nose to tail, headway is the clearance divided by the speed that closes it."""
+    separation = 40.0
+    speed = 12.5
+    ego = constant_body("ego", STEPS, x0=0.0, speed=speed, dt=DT)
+    lead = constant_body("lead", STEPS, x0=separation, speed=speed, dt=DT)
+    trace = build_trace(ego, (lead,), dt=DT)
+    clearance = float(clearance_series(trace)[0])
+    assert float(time_headway_series(trace)[0]) == pytest.approx(clearance / speed, rel=1e-12)
+
+
+def test_time_headway_scores_a_follower_that_time_to_collision_cannot() -> None:
+    """Two vehicles holding one speed never close, so only headway sees the short gap."""
+    ego = constant_body("ego", STEPS, x0=0.0, speed=13.0, dt=DT)
+    lead = constant_body("lead", STEPS, x0=11.0, speed=13.0, dt=DT)
+    trace = build_trace(ego, (lead,), dt=DT)
+    assert np.all(np.isinf(time_to_collision_series(trace)))
+    assert float(time_headway_series(trace)[0]) < 0.5
+
+
+def test_time_headway_ignores_a_vehicle_behind_the_ego() -> None:
+    """Headway is a forward query: a follower is scored by clearance instead."""
+    ego = constant_body("ego", STEPS, x0=50.0, speed=13.0, dt=DT)
+    follower = constant_body("follower", STEPS, x0=40.0, speed=13.0, dt=DT)
+    trace = build_trace(ego, (follower,), dt=DT)
+    assert np.all(np.isfinite(clearance_series(trace)))
+    assert np.all(np.isinf(time_headway_series(trace)))
+
+
+def test_time_headway_ignores_a_vehicle_a_lane_over() -> None:
+    """A vehicle offset by a lane width sits outside the corridor the ego sweeps."""
+    ego = constant_body("ego", STEPS, x0=0.0, speed=13.0, dt=DT)
+    neighbour = constant_body("neighbour", STEPS, x0=25.0, speed=13.0, y=3.5, dt=DT)
+    trace = build_trace(ego, (neighbour,), dt=DT)
+    assert np.all(np.isinf(time_headway_series(trace)))
+
+
+def test_time_headway_is_infinite_at_standstill() -> None:
+    """A stopped ego covers no ground, so it has no headway to the vehicle ahead."""
+    ego = constant_body("ego", STEPS, x0=0.0, speed=0.0, dt=DT)
+    lead = constant_body("lead", STEPS, x0=12.0, speed=0.0, dt=DT)
+    trace = build_trace(ego, (lead,), dt=DT)
+    assert np.all(np.isinf(time_headway_series(trace)))
+
+
 # ---------------------------------------------------------------------------
 # Assertion verdicts, one hand checked case and one boundary case each
 # ---------------------------------------------------------------------------
@@ -182,6 +235,31 @@ def test_min_time_to_collision_fails_just_below_the_threshold() -> None:
     )
     assert not result.passed
     assert result.worst_value == pytest.approx(1.4999)
+
+
+def test_min_time_headway_passes_exactly_at_the_threshold() -> None:
+    """The lower bound on headway is inclusive, like every other lower bound."""
+    trace = _flat_trace()
+    headway = _uniform(3.0)
+    headway[6] = 1.0
+    result = evaluate_assertion(
+        MinTimeHeadway(threshold=1.0), trace, _metrics(_uniform(3.0), _uniform(math.inf), headway)
+    )
+    assert result.passed
+    assert result.worst_value == 1.0
+    assert result.worst_time == pytest.approx(0.6)
+
+
+def test_min_time_headway_fails_just_below_the_threshold() -> None:
+    """A run whose time to collision never closes still fails on a short headway."""
+    trace = _flat_trace()
+    headway = _uniform(3.0)
+    headway[6] = 0.9999
+    result = evaluate_assertion(
+        MinTimeHeadway(threshold=1.0), trace, _metrics(_uniform(3.0), _uniform(math.inf), headway)
+    )
+    assert not result.passed
+    assert result.worst_value == pytest.approx(0.9999)
 
 
 def test_min_distance_passes_exactly_at_the_threshold() -> None:
@@ -328,7 +406,7 @@ def test_goal_reached_reports_the_shortfall_when_never_reached() -> None:
 def test_every_result_reports_a_worst_value_and_a_bound() -> None:
     """No assertion may return a verdict without the evidence behind it."""
     trace = _flat_trace()
-    metrics = _metrics(_uniform(3.0), _uniform(4.0))
+    metrics = _metrics(_uniform(3.0), _uniform(4.0), _uniform(2.0))
     assertions = (
         NoCollision(),
         MinTimeToCollision(threshold=1.5),
@@ -337,6 +415,7 @@ def test_every_result_reports_a_worst_value_and_a_bound() -> None:
         SpeedLimit(limit=13.9),
         GoalReached(goal_s=5.0, time_budget=3.0),
         MinDistance(threshold=1.0),
+        MinTimeHeadway(threshold=1.0),
     )
     for assertion in assertions:
         result = evaluate_assertion(assertion, trace, metrics)

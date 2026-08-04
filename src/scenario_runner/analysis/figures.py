@@ -37,6 +37,7 @@ from scenario_runner.model import (
     LateralAcceleration,
     LongitudinalAcceleration,
     MinDistance,
+    MinTimeHeadway,
     MinTimeToCollision,
     NoCollision,
     Scenario,
@@ -467,16 +468,20 @@ def bound_utilisation(assertion: Assertion, result: AssertionResult) -> float | 
     ``no_collision`` also declares ``min_distance`` over the same series with a
     stated threshold.
 
-    Two cases are reported as infinite rather than as a number. A clearance or a
-    time to collision that reached zero has consumed a bound it can no longer be
-    divided by, and a goal that was never reached has not merely overspent its
-    time budget but has no finishing time at all.
+    Two cases are reported as infinite rather than as a number. A clearance, a
+    time to collision or a headway that reached zero has consumed a bound it can
+    no longer be divided by, and a goal that was never reached has not merely
+    overspent its time budget but has no finishing time at all.
     """
     worst = result.worst_value
     match assertion:
         case NoCollision():
             return None
-        case MinTimeToCollision(threshold=threshold) | MinDistance(threshold=threshold):
+        case (
+            MinTimeToCollision(threshold=threshold)
+            | MinTimeHeadway(threshold=threshold)
+            | MinDistance(threshold=threshold)
+        ):
             if not math.isfinite(worst):
                 return 0.0
             return math.inf if worst <= 0.0 else threshold / worst

@@ -22,7 +22,11 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from scenario_runner.algorithm.metrics import clearance_series, time_to_collision_series
+from scenario_runner.algorithm.metrics import (
+    clearance_series,
+    time_headway_series,
+    time_to_collision_series,
+)
 from scenario_runner.algorithm.trace_view import FloatArray, TraceView
 from scenario_runner.model import (
     Assertion,
@@ -30,6 +34,7 @@ from scenario_runner.model import (
     LateralAcceleration,
     LongitudinalAcceleration,
     MinDistance,
+    MinTimeHeadway,
     MinTimeToCollision,
     NoCollision,
     Scenario,
@@ -64,6 +69,7 @@ class RunMetrics:
 
     clearance: FloatArray
     time_to_collision: FloatArray
+    time_headway: FloatArray
 
     @classmethod
     def from_trace(cls, trace: TraceView) -> RunMetrics:
@@ -71,6 +77,7 @@ class RunMetrics:
         return cls(
             clearance=clearance_series(trace),
             time_to_collision=time_to_collision_series(trace),
+            time_headway=time_headway_series(trace),
         )
 
 
@@ -132,6 +139,22 @@ def evaluate_assertion(
                 detail=f"margin {worst - threshold:+.3f} s"
                 if math.isfinite(worst)
                 else "never closing",
+            )
+
+        case MinTimeHeadway(threshold=threshold):
+            index = _argmin(metrics.time_headway)
+            worst = float(metrics.time_headway[index])
+            return AssertionResult(
+                name=assertion.name,
+                kind=assertion.kind,
+                passed=worst >= threshold,
+                worst_value=worst,
+                worst_time=_at(trace, index, worst),
+                unit="s",
+                bound=f">= {threshold:g} s",
+                detail=f"margin {worst - threshold:+.3f} s"
+                if math.isfinite(worst)
+                else "no leader ahead at a non-zero ego speed",
             )
 
         case LongitudinalAcceleration(minimum=minimum, maximum=maximum):
