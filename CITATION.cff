@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "AV Scenario Runner"
+abstract: >-
+  A declarative TOML scenario format and deterministic regression harness for
+  autonomous driving controllers, scoring each run against assertions that
+  report the worst value observed, the second it happened, and the bound it was
+  tested against rather than a bare verdict.
+type: software
+authors:
+  - family-names: Yilmaz
+    given-names: Emre
+repository-code: "https://github.com/Eelis03/av-scenario-runner"
+license: MIT
+version: "0.1.0"
+date-released: "2026-08-11"
+keywords:
+  - autonomous-driving
+  - simulation
+  - scenario-testing
+  - regression
+  - python

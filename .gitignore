@@ -9,6 +9,9 @@ dist/
 build/
 *.egg-info/
 outputs/
+.coverage
+.coverage.*
+htmlcov/
 .DS_Store
 
 # viz build artefacts; `npm install && npm run build` inside viz/ recreates them

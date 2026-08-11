@@ -116,9 +116,7 @@ class _Reader:
         self.index = index
 
     def fail(self, field: str, message: str) -> NoReturn:
-        raise ScenarioError(
-            message, source=self.source, field=field, line=self.index.locate(field)
-        )
+        raise ScenarioError(message, source=self.source, field=field, line=self.index.locate(field))
 
     def table(self, data: Mapping[str, object], key: str, field: str) -> Mapping[str, object]:
         value = data.get(key)
@@ -279,9 +277,7 @@ def parse_scenario(text: str, *, source: str = "<scenario>") -> Scenario:
 
     name = reader.text(raw, "name", "name", None)
     description = reader.text(raw, "description", "description", "")
-    expected = reader.choice(
-        raw, "expected_outcome", "expected_outcome", "pass", ("pass", "fail")
-    )
+    expected = reader.choice(raw, "expected_outcome", "expected_outcome", "pass", ("pass", "fail"))
     dt = reader.number(raw, "dt", "dt", 0.05, minimum=0.0, maximum=1.0, exclusive_min=True)
     seed = reader.integer(raw, "seed", "seed", 0, minimum=0, maximum=2**31 - 1)
 
@@ -342,12 +338,8 @@ def _parse_road(reader: _Reader, raw: Mapping[str, object]) -> RoadSpec:
     radius = 0.0
     direction = "left"
     if kind == "arc":
-        radius = reader.number(
-            raw, "radius", "road.radius", None, minimum=1.0, exclusive_min=False
-        )
-        direction = reader.choice(
-            raw, "direction", "road.direction", "left", ("left", "right")
-        )
+        radius = reader.number(raw, "radius", "road.radius", None, minimum=1.0, exclusive_min=False)
+        direction = reader.choice(raw, "direction", "road.direction", "left", ("left", "right"))
     return RoadSpec(
         kind=kind,
         lanes=lanes,
@@ -374,9 +366,7 @@ def _parse_idm(reader: _Reader, raw: Mapping[str, object], prefix: str) -> IdmPa
         time_gap=reader.number(
             raw, "time_gap", f"{prefix}.time_gap", defaults.time_gap, minimum=0.0
         ),
-        min_gap=reader.number(
-            raw, "min_gap", f"{prefix}.min_gap", defaults.min_gap, minimum=0.0
-        ),
+        min_gap=reader.number(raw, "min_gap", f"{prefix}.min_gap", defaults.min_gap, minimum=0.0),
         max_accel=reader.number(
             raw,
             "max_accel",
@@ -736,9 +726,7 @@ def _parse_assertion(
     )
 
 
-def _parse_perception(
-    reader: _Reader, raw: Mapping[str, object], version: str
-) -> PerceptionSpec:
+def _parse_perception(reader: _Reader, raw: Mapping[str, object], version: str) -> PerceptionSpec:
     if "perception" not in raw:
         return PerceptionSpec()
     if version < _PERCEPTION_MIN_VERSION:

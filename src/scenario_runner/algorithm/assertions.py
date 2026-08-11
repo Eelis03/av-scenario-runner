@@ -248,6 +248,4 @@ def evaluate_assertion(
 def evaluate_assertions(scenario: Scenario, trace: TraceView) -> tuple[AssertionResult, ...]:
     """Score every assertion the scenario declares, in declaration order."""
     metrics = RunMetrics.from_trace(trace)
-    return tuple(
-        evaluate_assertion(assertion, trace, metrics) for assertion in scenario.assertions
-    )
+    return tuple(evaluate_assertion(assertion, trace, metrics) for assertion in scenario.assertions)

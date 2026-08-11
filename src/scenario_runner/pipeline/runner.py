@@ -161,7 +161,5 @@ def run_suite(
 ) -> SuiteResult:
     """Run every scenario in ``paths``, in order."""
     return SuiteResult(
-        scenarios=tuple(
-            run_scenario_file(path, seed=seed, max_steps=max_steps) for path in paths
-        )
+        scenarios=tuple(run_scenario_file(path, seed=seed, max_steps=max_steps) for path in paths)
     )

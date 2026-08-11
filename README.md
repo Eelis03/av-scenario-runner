@@ -3,7 +3,7 @@
 Declarative scenario format and regression harness for evaluating autonomous driving controllers.
 
 [![CI](https://github.com/Eelis03/av-scenario-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/Eelis03/av-scenario-runner/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Write a driving situation as a validated TOML document, simulate it deterministically, and score it
@@ -173,7 +173,9 @@ from scenario_runner.pipeline import run_scenario
 scenario = load_scenario("scenarios/cut_in_moderate.toml")
 result, trace = run_scenario(scenario)
 for item in result.assertions:
-    print(f"{item.outcome} {item.name}: worst {item.worst_value:.3f} {item.unit} at {item.worst_time:.2f} s")
+    print(
+        f"{item.outcome} {item.name}: worst {item.worst_value:.3f} {item.unit} at {item.worst_time:.2f} s"
+    )
 ```
 
 Six runnable scripts in `examples/` wire the package together and have no logic of their own:
@@ -193,7 +195,9 @@ the Python package. See [viz/README.md](viz/README.md).
 
 ## Installation
 
-Requires Python 3.12 or later.
+Requires Python 3.12 or later. Continuous integration runs the whole suite on 3.12 and 3.13, on
+Linux and on Windows, so the version floor in `pyproject.toml` is a tested claim rather than a
+declared one.
 
 ```bash
 git clone https://github.com/Eelis03/av-scenario-runner.git

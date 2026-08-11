@@ -109,9 +109,7 @@ def test_plot_safety_timeline_writes_a_png(
     """The clearance, time to collision and braking figure renders from a real trace."""
     scenario, trace = short_run
     result, _ = run_scenario(scenario, max_steps=80)
-    target = plot_safety_timeline(
-        scenario, trace, tmp_path / "timeline.png", result.assertions
-    )
+    target = plot_safety_timeline(scenario, trace, tmp_path / "timeline.png", result.assertions)
     assert target.read_bytes()[:8] == PNG_MAGIC
 
 

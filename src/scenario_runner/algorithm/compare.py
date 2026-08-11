@@ -306,9 +306,7 @@ def compare_suites(
         )
 
     for name in sorted(set(current_by_name) & set(baseline_by_name)):
-        changes.extend(
-            _compare_scenario(current_by_name[name], baseline_by_name[name], band)
-        )
+        changes.extend(_compare_scenario(current_by_name[name], baseline_by_name[name], band))
 
     changes.sort(key=lambda change: (_SEVERITY[change.kind], change.scenario, change.assertion))
     return ComparisonReport(changes=tuple(changes), tolerance=band)

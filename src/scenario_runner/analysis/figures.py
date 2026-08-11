@@ -129,9 +129,7 @@ def plot_run(
         scenario.road.speed_limit, color="0.5", linestyle=":", linewidth=1.0, label="speed limit"
     )
     twin = middle.twinx()
-    twin.plot(
-        trace.time, trace.ego_accel, color="#a13d2d", linewidth=1.0, label="longitudinal a"
-    )
+    twin.plot(trace.time, trace.ego_accel, color="#a13d2d", linewidth=1.0, label="longitudinal a")
     twin.plot(
         trace.time,
         trace.ego_lateral_accel,
@@ -231,9 +229,7 @@ def _spread_indices(along: FloatArray, across: FloatArray, count: int) -> list[i
     steps = int(along.size)
     if steps <= count:
         return list(range(steps))
-    travelled = np.concatenate(
-        ([0.0], np.cumsum(np.hypot(np.diff(along), np.diff(across))))
-    )
+    travelled = np.concatenate(([0.0], np.cumsum(np.hypot(np.diff(along), np.diff(across)))))
     total = float(travelled[-1])
     if total <= 0.0:
         return [int(value) for value in np.linspace(0, steps - 1, count)]
@@ -265,8 +261,13 @@ def plot_encounter(scenario: Scenario, trace: Trace, path: Path | str) -> Path:
 
     _footprint_box(axes, 0.0, 0.0, scenario.ego.shape, _EGO_COLOUR, 1.0)
     axes.annotate(
-        "ego", xy=(0.0, 0.0), xytext=(0, 14), textcoords="offset points", fontsize=7,
-        color=_EGO_COLOUR, ha="center",
+        "ego",
+        xy=(0.0, 0.0),
+        xytext=(0, 14),
+        textcoords="offset points",
+        fontsize=7,
+        color=_EGO_COLOUR,
+        ha="center",
     )
 
     count = min(_SNAPSHOTS, trace.steps)
@@ -345,7 +346,11 @@ def plot_safety_timeline(
     top.plot(time, clearance, color=_EGO_COLOUR, linewidth=1.4)
     top.axhline(0.0, color=_ACTOR_COLOUR, linewidth=1.0, linestyle="-")
     top.annotate(
-        "contact", xy=(time[0], 0.0), xytext=(4, 7), textcoords="offset points", fontsize=7,
+        "contact",
+        xy=(time[0], 0.0),
+        xytext=(4, 7),
+        textcoords="offset points",
+        fontsize=7,
         color=_ACTOR_COLOUR,
     )
     distance = _threshold(scenario.assertions, "min_distance")
@@ -542,9 +547,7 @@ def plot_bound_utilisation(entries: Sequence[BoundUse], path: Path | str) -> Pat
     axes.set_ylim(-0.8, len(ordered) - 0.2)
     axes.set_xlim(0.0, ceiling)
     axes.set_xlabel("fraction of the assertion bound consumed by the worst observed value")
-    axes.set_title(
-        "Every assertion in the suite on one scale: green held, red did not", fontsize=9
-    )
+    axes.set_title("Every assertion in the suite on one scale: green held, red did not", fontsize=9)
     axes.grid(True, axis="x", alpha=0.25)
     axes.tick_params(axis="x", labelsize=7)
     return _write(figure, path)

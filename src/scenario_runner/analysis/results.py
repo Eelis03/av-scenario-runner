@@ -130,9 +130,7 @@ def suite_from_json(raw: dict[str, Any]) -> SuiteResult:
         raise ValueError(
             f"unsupported result_version {version!r}; this build reads {RESULT_VERSION!r}"
         )
-    return SuiteResult(
-        scenarios=tuple(_scenario_from_json(entry) for entry in raw["scenarios"])
-    )
+    return SuiteResult(scenarios=tuple(_scenario_from_json(entry) for entry in raw["scenarios"]))
 
 
 def dump_suite_result(suite: SuiteResult, path: Path | str) -> Path:
