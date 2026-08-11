@@ -220,7 +220,5 @@ def test_vehicle_disc_cover_contains_the_footprint() -> None:
         for across in (-shape.width / 2.0, shape.width / 2.0)
     ]
     for along, across in corners:
-        covered = min(
-            math.hypot(along - offset, across) for offset in shape.disc_offsets
-        )
+        covered = min(math.hypot(along - offset, across) for offset in shape.disc_offsets)
         assert covered <= shape.disc_radius + 1e-12

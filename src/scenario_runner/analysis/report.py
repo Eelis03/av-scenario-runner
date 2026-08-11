@@ -91,8 +91,10 @@ def render_comparison(report: ComparisonReport) -> str:
     else:
         lines = [f"comparison against baseline: {len(report.changes)} difference(s)", ""]
         for change in report.changes:
-            target = change.scenario if not change.assertion else (
-                f"{change.scenario}.{change.assertion}"
+            target = (
+                change.scenario
+                if not change.assertion
+                else (f"{change.scenario}.{change.assertion}")
             )
             lines.append(f"  {change.kind.value:<18} {target:<48} {change.detail}")
         lines.append("")
@@ -103,7 +105,6 @@ def render_comparison(report: ComparisonReport) -> str:
         f"regressed {report.regressed}"
     )
     lines.append(
-        f"tolerance: relative {report.tolerance.relative:g}, "
-        f"absolute {report.tolerance.absolute:g}"
+        f"tolerance: relative {report.tolerance.relative:g}, absolute {report.tolerance.absolute:g}"
     )
     return "\n".join(lines)

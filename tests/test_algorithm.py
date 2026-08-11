@@ -511,9 +511,7 @@ def test_a_rename_is_matched_inside_the_comparison_tolerance() -> None:
 
 def test_a_rename_alongside_an_unrelated_removal_keeps_both_readable() -> None:
     """One rename and one genuine removal are reported as one of each."""
-    baseline = SuiteRecord(
-        scenarios=(_record("old", True, 2.0), _record("dropped", True, 5.0))
-    )
+    baseline = SuiteRecord(scenarios=(_record("old", True, 2.0), _record("dropped", True, 5.0)))
     current = SuiteRecord(scenarios=(_record("new", True, 2.0),))
     report = compare_suites(current, baseline)
     kinds = [change.kind for change in report.changes]

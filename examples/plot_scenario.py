@@ -1,6 +1,6 @@
 """Render a figure for one scenario: paths, footprints, speed, and safety metrics.
 
-    uv run python examples/plot_scenario.py --scenario cut_in_moderate
+uv run python examples/plot_scenario.py --scenario cut_in_moderate
 """
 
 from __future__ import annotations

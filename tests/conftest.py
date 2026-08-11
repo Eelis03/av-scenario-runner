@@ -109,5 +109,3 @@ def scenario_paths() -> tuple[Path, ...]:
 def malformed_paths() -> tuple[Path, ...]:
     """Every malformed scenario fixture, in a stable order."""
     return tuple(sorted(MALFORMED_DIR.glob("*.toml")))
-
-

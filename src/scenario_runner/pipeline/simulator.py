@@ -87,9 +87,7 @@ def _clearance(
     actor_centres = _disc_centres(actor_pose_value, actor_shape)
     radii = ego_shape.disc_radius + actor_shape.disc_radius
     return min(
-        math.hypot(a[0] - b[0], a[1] - b[1]) - radii
-        for a in ego_centres
-        for b in actor_centres
+        math.hypot(a[0] - b[0], a[1] - b[1]) - radii for a in ego_centres for b in actor_centres
     )
 
 

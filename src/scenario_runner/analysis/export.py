@@ -56,9 +56,7 @@ def _body(body: BodyTrace, role: str) -> dict[str, Any]:
     }
 
 
-def trace_to_json(
-    trace: Trace, assertions: tuple[AssertionResult, ...] = ()
-) -> dict[str, Any]:
+def trace_to_json(trace: Trace, assertions: tuple[AssertionResult, ...] = ()) -> dict[str, Any]:
     """Render ``trace`` as the JSON object the browser playback reads."""
     road = trace.road
     return {

@@ -98,9 +98,7 @@ class VehicleShape:
     def disc_offsets(self) -> tuple[float, ...]:
         """Longitudinal offsets of the disc centres from the reference point."""
         segment = self.length / self.disc_count
-        return tuple(
-            self.rear_offset + (index + 0.5) * segment for index in range(self.disc_count)
-        )
+        return tuple(self.rear_offset + (index + 0.5) * segment for index in range(self.disc_count))
 
 
 DEFAULT_SHAPE: Final[VehicleShape] = VehicleShape()
