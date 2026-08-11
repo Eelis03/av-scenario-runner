@@ -42,14 +42,14 @@ it. A version outside the supported set is rejected with the set listed.
 
 ### The assertion vocabulary
 
-Seven assertion kinds are implemented: `no_collision`, `min_time_to_collision`,
-`longitudinal_acceleration`, `lateral_acceleration`, `speed_limit`, `goal_reached`, and
-`min_distance`. Each returns the worst value it observed, the time at which it occurred, the bound
-it was tested against, and a one line detail. This is not decoration. The difference between a
-scenario that passes with four metres of clearance and one that passes with two centimetres does
-not appear in a verdict, and it is exactly the difference that predicts whether a small change to
-the controller will break the scenario next week. Every report in this repository prints the worst
-value for passing assertions as well as failing ones for that reason.
+Eight assertion kinds are implemented: `no_collision`, `min_time_to_collision`,
+`min_time_headway`, `longitudinal_acceleration`, `lateral_acceleration`, `speed_limit`,
+`goal_reached`, and `min_distance`. Each returns the worst value it observed, the time at which it
+occurred, the bound it was tested against, and a one line detail. This is not decoration. The
+difference between a scenario that passes with four metres of clearance and one that passes with
+two centimetres does not appear in a verdict, and it is exactly the difference that predicts
+whether a small change to the controller will break the scenario next week. Every report in this
+repository prints the worst value for passing assertions as well as failing ones for that reason.
 
 The comparison direction is fixed and uniform: lower bounds are inclusive, upper bounds are
 inclusive, and `no_collision` is the single strict comparison, because zero clearance is contact
@@ -63,6 +63,27 @@ smallest non-negative root of `|p + v t| = R`, and taking the minimum over pairs
 The two dimensional form matters. A purely longitudinal time to collision, computed from a gap and
 a closing speed within a lane, cannot score a cut in until the cutting vehicle is already in the
 lane, which is after the moment that made the manoeuvre dangerous.
+
+Time headway is the same root solved with the other vehicle held stationary, so it is the time the
+ego needs to reach the space that vehicle occupies now. Both are in the vocabulary because Vogel
+(2003) compares them and finds that they identify different situations, and the two failure modes
+are easy to state. Time to collision is a function of the relative motion and goes to infinity the
+moment the closing speed does, so a vehicle followed two metres behind at a matched speed scores
+infinity; headway divides the gap by the ego's own speed and scores it anyway. The converse holds
+as well: a vehicle approached from two hundred metres back has a comfortable headway and a short
+time to collision. Neither ordering can be recovered from the other, so a scenario that cares about
+following distance declares `min_time_headway` and a scenario that cares about closing declares
+`min_time_to_collision`.
+
+The corridor that headway searches is the disc cover corridor rather than a lane. Its half width is
+the sum of the two disc radii, 2.442 m for two default footprints, so a vehicle in the neighbouring
+lane of a 3.5 m road is not the ego's leader and a cutting vehicle becomes one partway through the
+manoeuvre rather than at the lane line. That is the same conservatism, and the same lateness, that
+clearance already carries, which is the point: the two metrics should differ about the road, not
+about the geometry. A vehicle behind the ego is never reached by an ego holding its heading, and
+neither is any vehicle while the ego is stopped, so both report infinity. The second of those is
+the conventional reading of a quantity that divides by speed, and it is why a scenario that ends
+with the ego stationary behind an obstacle needs `min_distance` rather than `min_time_headway`.
 
 Footprints are covered by three equal discs along the vehicle axis, following Ziegler and Stiller
 (2010). Clearance is then the minimum disc pair distance less the two radii, which is zero at

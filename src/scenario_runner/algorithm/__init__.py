@@ -30,6 +30,7 @@ from scenario_runner.algorithm.metrics import (
     disc_centres,
     footprint_corners,
     nearest_actor,
+    time_headway_series,
     time_to_collision_series,
 )
 from scenario_runner.algorithm.trace_view import BodyView, FloatArray, TraceView
@@ -56,5 +57,6 @@ __all__ = [
     "magnitude_class",
     "match_renames",
     "nearest_actor",
+    "time_headway_series",
     "time_to_collision_series",
 ]

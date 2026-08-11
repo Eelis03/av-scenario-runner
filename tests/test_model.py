@@ -11,6 +11,7 @@ from scenario_runner.model import (
     CURRENT_FORMAT_VERSION,
     KNOWN_CONTROLLERS,
     SUPPORTED_FORMAT_VERSIONS,
+    MinTimeHeadway,
     ReactiveBehaviour,
     Scenario,
     ScenarioError,
@@ -159,6 +160,26 @@ def test_goal_reached_inherits_the_termination_goal() -> None:
     scenario = load_scenario(FIXTURE_DIR / "valid_minimal.toml")
     goal = next(item for item in scenario.assertions if item.kind == "goal_reached")
     assert goal.goal_s == scenario.termination.goal_s
+
+
+def test_min_time_headway_carries_its_threshold_through_the_round_trip() -> None:
+    """The headway assertion survives the serialiser with its bound intact."""
+    document = (FIXTURE_DIR / "valid_minimal.toml").read_text(encoding="utf-8")
+    document += '\n[[assert]]\nkind = "min_time_headway"\nthreshold = 1.2\n'
+    scenario = parse_scenario(document, source="headway.toml")
+    headway = next(item for item in scenario.assertions if item.kind == "min_time_headway")
+    assert isinstance(headway, MinTimeHeadway)
+    assert headway.threshold == 1.2
+    assert parse_scenario(to_toml(scenario), source="headway.toml") == scenario
+
+
+def test_min_time_headway_without_a_threshold_is_rejected() -> None:
+    """The bound is required rather than defaulted, so an omission cannot pass quietly."""
+    document = (FIXTURE_DIR / "valid_minimal.toml").read_text(encoding="utf-8")
+    document += '\n[[assert]]\nkind = "min_time_headway"\n'
+    with pytest.raises(ScenarioError) as caught:
+        parse_scenario(document, source="headway.toml")
+    assert "assert[3].threshold" in str(caught.value)
 
 
 def test_default_assertion_names_are_unique_per_kind() -> None:

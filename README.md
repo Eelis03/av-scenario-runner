@@ -112,8 +112,15 @@ perception_in_version_1_0.toml: perception: the [perception] table requires form
 `uv run python examples/validate_scenarios.py` prints all twenty two of those, one per malformed
 fixture, and round trips every shipped scenario through the parser and the serialiser on the way.
 
-The seven assertion kinds are `no_collision`, `min_distance`, `min_time_to_collision`,
-`longitudinal_acceleration`, `lateral_acceleration`, `speed_limit` and `goal_reached`. An actor is
+The eight assertion kinds are `no_collision`, `min_distance`, `min_time_to_collision`,
+`min_time_headway`, `longitudinal_acceleration`, `lateral_acceleration`, `speed_limit` and
+`goal_reached`. The last two safety metrics are both there because neither implies the other. Time
+to collision is a function of the relative motion and goes to infinity the moment the closing speed
+does, so a vehicle followed two metres behind at a matched speed is scored as perfectly safe;
+headway divides the gap by the ego's own speed and does not care whether the gap is closing. In
+`tests/test_pipeline.py::test_headway_catches_the_tailgater_that_time_to_collision_calls_clean` an
+ego settles into a headway of 0.744 s while its time to collision never falls below 12.9 s, and both
+are scored against the same 1.5 s bound. An actor is
 either `scripted`, meaning an acceleration schedule and at most one lane change, both closed form
 functions of time, or `reactive`, meaning it follows whatever is ahead of it using the Intelligent
 Driver Model, the ego included. A scripted actor cannot react to the controller under test, which is
@@ -390,7 +397,7 @@ closed limitations in [docs/design-notes.md](docs/design-notes.md).
 uv run pytest --cov=src/scenario_runner --cov-report=term-missing
 ```
 
-147 tests pass in about 13 seconds on one core, covering 97 per cent of the package by statement. The
+157 tests pass in about 13 seconds on one core, covering 97 per cent of the package by statement. The
 suite has three tiers. Tier one checks properties: every assertion is scored against a hand built
 trace whose correct verdict is known by inspection, and scored again with the observed value placed
 exactly on its threshold; twenty two malformed documents are each rejected with a message naming the
@@ -458,7 +465,7 @@ that no file under `src/` or `tests/` mentions `viz/`.
 | `model/locate.py` | Recovery of a source line number for a dotted field path |
 | `model/serialise.py` | Rendering a validated scenario back to TOML for the round trip |
 | `model/geometry.py` | Road frame conversions for a straight or constant curvature road |
-| `algorithm/metrics.py` | Disc cover clearance and two dimensional time to collision |
+| `algorithm/metrics.py` | Disc cover clearance, two dimensional time to collision, and time headway |
 | `algorithm/assertions.py` | The assertion vocabulary, each reporting worst value and time |
 | `algorithm/compare.py` | Baseline comparison, rename matching, and the magnitude class |
 | `algorithm/trace_view.py` | The structural view of a run that the scoring code requires |
@@ -476,6 +483,8 @@ that no file under `src/` or `tests/` mentions `viz/`.
 The methods are published ones rather than invented ones. Time to collision follows the constant
 velocity definition of Hayward (1972), generalised to two dimensions so that a lateral encounter
 such as a cut in is scored at all, rather than only once the cutting vehicle is already in the lane.
+Time headway is the same query solved with the other vehicle held stationary, the indicator Vogel
+(2003) compares against time to collision and finds cannot be substituted for it.
 Footprints are covered by three equal discs along the vehicle axis, the fast collision approximation
 of Ziegler and Stiller (2010), which makes clearance and time to collision the same closed form
 query; the cover is conservative by 0.454 m at each bumper and 0.271 m at each side for the default
@@ -524,6 +533,10 @@ Safety metrics:
   Record*, 384, Highway Research Board, 1972, pp. 24-34. Stable URL:
   <https://onlinepubs.trb.org/Onlinepubs/hrr/1972/384/384-004.pdf>. The constant velocity time to
   collision definition implemented in `algorithm/metrics.py`.
+- Vogel, K. "A comparison of headway and time to collision as safety indicators." *Accident
+  Analysis and Prevention*, 35(3), 2003, pp. 427-433. DOI:
+  [10.1016/S0001-4575(02)00022-2](https://doi.org/10.1016/S0001-4575(02)00022-2). The finding that
+  the two indicators identify different situations, which is why the vocabulary carries both.
 - Shalev-Shwartz, S., Shammah, S., Shashua, A. "On a Formal Model of Safe and Scalable Self-Driving
   Cars." arXiv preprint, 2017. DOI:
   [10.48550/arXiv.1708.06374](https://doi.org/10.48550/arXiv.1708.06374). Responsibility sensitive

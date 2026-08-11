@@ -32,6 +32,7 @@ __all__ = [
     "LateralParams",
     "LongitudinalAcceleration",
     "MinDistance",
+    "MinTimeHeadway",
     "MinTimeToCollision",
     "NoCollision",
     "PerceptionSpec",
@@ -263,6 +264,15 @@ class MinTimeToCollision:
 
 
 @dataclass(frozen=True, slots=True)
+class MinTimeHeadway:
+    """Time headway to the vehicle ahead must stay at or above ``threshold`` seconds."""
+
+    kind: ClassVar[str] = "min_time_headway"
+    name: str = "min_time_headway"
+    threshold: float = 1.0
+
+
+@dataclass(frozen=True, slots=True)
 class LongitudinalAcceleration:
     """Ego longitudinal acceleration must stay inside a comfort band."""
 
@@ -313,6 +323,7 @@ class MinDistance:
 Assertion = (
     NoCollision
     | MinTimeToCollision
+    | MinTimeHeadway
     | LongitudinalAcceleration
     | LateralAcceleration
     | SpeedLimit
@@ -326,6 +337,7 @@ AssertionSpec = Assertion
 ASSERTION_KINDS: Final[tuple[str, ...]] = (
     NoCollision.kind,
     MinTimeToCollision.kind,
+    MinTimeHeadway.kind,
     LongitudinalAcceleration.kind,
     LateralAcceleration.kind,
     SpeedLimit.kind,

@@ -70,6 +70,50 @@ range_noise_std = 1.5
 speed_noise_std = 0.4
 """
 
+TAILGATING_SCENARIO = """
+format_version = "1.1"
+name = "ego_tailgates"
+dt = 0.05
+seed = 0
+
+[road]
+kind = "straight"
+lanes = 1
+lane_width = 3.5
+length = 400.0
+speed_limit = 20.0
+
+[ego]
+lane = 0
+s = 0.0
+speed = 13.0
+controller = "idm_lane_keep"
+
+[ego.longitudinal]
+desired_speed = 16.0
+time_gap = 0.3
+min_gap = 2.0
+
+[[actor]]
+id = "lead"
+lane = 0
+s = 40.0
+speed = 13.0
+behaviour = "scripted"
+schedule = [{ time = 0.0, accel = 0.0 }]
+
+[termination]
+max_time = 20.0
+
+[[assert]]
+kind = "min_time_to_collision"
+threshold = 1.5
+
+[[assert]]
+kind = "min_time_headway"
+threshold = 1.5
+"""
+
 
 # ---------------------------------------------------------------------------
 # Motion models
@@ -263,6 +307,22 @@ def test_malformed_scenario_becomes_a_failing_result_not_a_skip() -> None:
     assert result.error is not None
     assert "ego.controller" in result.error
     assert run_suite([MALFORMED_DIR / "unknown_controller.toml"]).exit_code() == 1
+
+
+def test_headway_catches_the_tailgater_that_time_to_collision_calls_clean() -> None:
+    """An ego closing on a leader it never overtakes fails on headway alone.
+
+    The run starts with a headway of 2.65 s and settles at 0.74 s, while time to
+    collision never falls below 12.9 s against the same 1.5 s bound, because the
+    closing speed vanishes as the gap the ego is settling into is reached.
+    """
+    scenario = parse_scenario(TAILGATING_SCENARIO, source="ego_tailgates.toml")
+    result, _ = run_scenario(scenario)
+    by_kind = {item.kind: item for item in result.assertions}
+    assert by_kind["min_time_to_collision"].passed
+    assert by_kind["min_time_to_collision"].worst_value > 10.0
+    assert not by_kind["min_time_headway"].passed
+    assert by_kind["min_time_headway"].worst_value < 1.0
 
 
 def test_collision_scenario_reports_negative_clearance_with_a_time() -> None:

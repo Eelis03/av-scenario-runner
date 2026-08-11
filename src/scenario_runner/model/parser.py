@@ -32,6 +32,7 @@ from scenario_runner.model.scenario import (
     LateralParams,
     LongitudinalAcceleration,
     MinDistance,
+    MinTimeHeadway,
     MinTimeToCollision,
     NoCollision,
     PerceptionSpec,
@@ -97,6 +98,7 @@ _SHAPE_KEYS: Final[frozenset[str]] = frozenset(
 _ASSERT_KEYS: Final[Mapping[str, frozenset[str]]] = {
     "no_collision": frozenset(),
     "min_time_to_collision": frozenset({"threshold"}),
+    "min_time_headway": frozenset({"threshold"}),
     "longitudinal_acceleration": frozenset({"minimum", "maximum"}),
     "lateral_acceleration": frozenset({"limit"}),
     "speed_limit": frozenset({"limit", "tolerance"}),
@@ -663,6 +665,13 @@ def _parse_assertion(
         return NoCollision(name=name)
     if kind == "min_time_to_collision":
         return MinTimeToCollision(
+            name=name,
+            threshold=reader.number(
+                raw, "threshold", f"{prefix}.threshold", None, minimum=0.0, exclusive_min=True
+            ),
+        )
+    if kind == "min_time_headway":
+        return MinTimeHeadway(
             name=name,
             threshold=reader.number(
                 raw, "threshold", f"{prefix}.threshold", None, minimum=0.0, exclusive_min=True

@@ -20,6 +20,7 @@ from scenario_runner.model.scenario import (
     LateralParams,
     LongitudinalAcceleration,
     MinDistance,
+    MinTimeHeadway,
     MinTimeToCollision,
     NoCollision,
     Scenario,
@@ -117,7 +118,7 @@ def _assertion_lines(assertion: Assertion) -> list[str]:
     match assertion:
         case NoCollision():
             pass
-        case MinTimeToCollision(threshold=threshold):
+        case MinTimeToCollision(threshold=threshold) | MinTimeHeadway(threshold=threshold):
             lines.append(f"threshold = {_num(threshold)}")
         case LongitudinalAcceleration(minimum=minimum, maximum=maximum):
             lines.append(f"minimum = {_num(minimum)}")
